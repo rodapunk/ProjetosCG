@@ -59,8 +59,7 @@ const GLchar* fragmentShaderSource = "#version 450\n"
 bool rotateX=false, rotateY=false, rotateZ=false;
 
 // Função MAIN
-int main()
-{
+int main() {
 	// Inicialização da GLFW
 	glfwInit();
 
@@ -72,11 +71,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	//Essencial para computadores da Apple
-//#ifdef __APPLE__
-//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-//#endif
-
 	// Criação da janela GLFW
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Ola 3D -- Estevan!", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
@@ -85,8 +79,7 @@ int main()
 	glfwSetKeyCallback(window, key_callback);
 
 	// GLAD: carrega todos os ponteiros d funções da OpenGL
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 	}
 
@@ -118,8 +111,7 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	// Loop da aplicação - "game loop"
-	while (!glfwWindowShouldClose(window))
-	{
+	while (!glfwWindowShouldClose(window)) {
 		// Checa se houveram eventos de input (key pressed, mouse moved etc.) e chama as funções de callback correspondentes
 		glfwPollEvents();
 
@@ -133,16 +125,13 @@ int main()
 		float angle = (GLfloat)glfwGetTime();
 
 		model = glm::mat4(1); 
-		if (rotateX)
-		{
+		if (rotateX) {
 			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
-		else if (rotateY)
-		{
+		else if (rotateY) {
 			model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
 		}
-		else if (rotateZ)
-		{
+		else if (rotateZ) {
 			model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		}
 
@@ -172,27 +161,23 @@ int main()
 // Função de callback de teclado - só pode ter uma instância (deve ser estática se
 // estiver dentro de uma classe) - É chamada sempre que uma tecla for pressionada
 // ou solta via GLFW
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	if (key == GLFW_KEY_X && action == GLFW_PRESS)
-	{
+	if (key == GLFW_KEY_X && action == GLFW_PRESS) {
 		rotateX = true;
 		rotateY = false;
 		rotateZ = false;
 	}
 
-	if (key == GLFW_KEY_Y && action == GLFW_PRESS)
-	{
+	if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
 		rotateX = false;
 		rotateY = true;
 		rotateZ = false;
 	}
 
-	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-	{
+	if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
 		rotateX = false;
 		rotateY = false;
 		rotateZ = true;
@@ -204,8 +189,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // O código fonte do vertex e fragment shader está nos arrays vertexShaderSource e
 // fragmentShader source no iniçio deste arquivo
 // A função retorna o identificador do programa de shader
-int setupShader()
-{
+int setupShader() {
 	// Vertex shader
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -214,8 +198,7 @@ int setupShader()
 	GLint success;
 	GLchar infoLog[512];
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
+	if (!success) {
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
@@ -225,8 +208,7 @@ int setupShader()
 	glCompileShader(fragmentShader);
 	// Checando erros de compilação (exibição via log no terminal)
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
+	if (!success) {
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
@@ -252,42 +234,38 @@ int setupShader()
 // Apenas atributo coordenada nos vértices
 // 1 VBO com as coordenadas, VAO com apenas 1 ponteiro para atributo
 // A função retorna o identificador do VAO
-int setupGeometry()
-{
+int setupGeometry() {
 	// Aqui setamos as coordenadas x, y e z do triângulo e as armazenamos de forma
 	// sequencial, já visando mandar para o VBO (Vertex Buffer Objects)
 	// Cada atributo do vértice (coordenada, cores, coordenadas de textura, normal, etc)
 	// Pode ser arazenado em um VBO único ou em VBOs separados
 	GLfloat vertices[] = {
-
 		//Base da pirâmide: 2 triângulos
 		//x    y    z    r    g    b
 		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
 		-0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
 		 0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
 
-		 -0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-		  0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		  0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		-0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
+		 0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
+		 0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
 
 		 //
-		 -0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		  0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
+		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
+		 0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
+		 0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
 
-		  -0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
-		  0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
-		  -0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		 0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
+		-0.5, -0.5,  0.5, 1.0, 0.0, 1.0,
 
-		   -0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		  0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
+		-0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
+		 0.0,  0.5, 0.0, 1.0, 1.0, 0.0,
+		 0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
 
-		   0.5, -0.5, 0.5, 0.0, 1.0, 1.0,
-		  0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
-		  0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
-
-
+		 0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
+		 0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
+		 0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
 	};
 
 	GLuint VBO, VAO;
