@@ -19,7 +19,7 @@ using namespace std;
 // GLFW
 #include <GLFW/glfw3.h>
 
-//GLM
+// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -47,7 +47,7 @@ const GLchar* vertexShaderSource = "#version 450\n"
 "finalColor = vec4(color, 1.0);\n"
 "}\0";
 
-//Códifo fonte do Fragment Shader (em GLSL): ainda hardcoded
+// Código fonte do Fragment Shader (em GLSL): ainda hardcoded
 const GLchar* fragmentShaderSource = "#version 450\n"
 "in vec4 finalColor;\n"
 "out vec4 color;\n"
@@ -57,16 +57,17 @@ const GLchar* fragmentShaderSource = "#version 450\n"
 "}\n\0";
 
 bool rotateX = false, rotateY = false, rotateZ = false;
+float transX = 0.0f, transZ = 0.0f, transY = 0.0f, scale = 1.0f;
 
 // Função MAIN
 int main() {
 	// Inicialização da GLFW
 	glfwInit();
 
-	//Muita atenção aqui: alguns ambientes não aceitam essas configurações
-	//Você deve adaptar para a versão do OpenGL suportada por sua placa
-	//Sugestão: comente essas linhas de código para desobrir a versão e
-	//depois atualize (por exemplo: 4.5 com 4 e 5)
+	// Muita atenção aqui: alguns ambientes não aceitam essas configurações
+	// Você deve adaptar para a versão do OpenGL suportada por sua placa
+	// Sugestão: comente essas linhas de código para desobrir a versão e
+	// depois atualize (por exemplo: 4.5 com 4 e 5)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -102,21 +103,21 @@ int main() {
 
 	glUseProgram(shaderID);
 
-	glm::mat4 model = glm::mat4(1); //matriz identidade;
+	glm::mat4 model = glm::mat4(1); // matriz identidade;
 	GLint modelLoc = glGetUniformLocation(shaderID, "model");
 
-	model = glm::rotate(model, /*(GLfloat)glfwGetTime()*/glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//model = glm::rotate(model, /*(GLfloat)glfwGetTime()*/glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	glUniformMatrix4fv(modelLoc, 1, FALSE, glm::value_ptr(model));
 
 	glEnable(GL_DEPTH_TEST);
 
 	// Loop da aplicação - "game loop"
 	while (!glfwWindowShouldClose(window)) {
-		// Checa se houveram eventos de input (key pressed, mouse moved etc.) e chama as funções de callback correspondentes
+		// Checa se houve eventos de input (key pressed, mouse moved etc.) e chama as funções de callback correspondentes
 		glfwPollEvents();
 
 		// Limpa o buffer de cor
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); //cor de fundo
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // cor de fundo
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glLineWidth(10);
@@ -125,6 +126,8 @@ int main() {
 		float angle = (GLfloat)glfwGetTime();
 
 		model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(transX, transZ, transY));
+
 		if (rotateX) {
 			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
@@ -134,6 +137,8 @@ int main() {
 		else if (rotateZ) {
 			model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		}
+
+		model = glm::scale(model, glm::vec3(scale, scale, scale));
 
 		glUniformMatrix4fv(modelLoc, 1, FALSE, glm::value_ptr(model));
 		// Chamada de desenho - drawcall
@@ -182,9 +187,57 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		rotateY = false;
 		rotateZ = true;
 	}
+
+	if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+		transZ += 0.1f;
+		if (transZ >= 0.5f)
+			transZ = 0.5f;
+	}
+
+	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+		transX -= 0.1f;
+		if (transX <= -0.5f)
+			transX = -0.5f;
+	}
+
+	if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+		transZ -= 0.1f;
+		if (transZ <= -0.5f)
+			transZ = -0.5f;
+	}
+
+	if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+		transX += 0.1f;
+		if (transX >= 0.5f)
+			transX = 0.5f;
+	}
+
+	if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+		transY += 0.1f;
+		if (transX >= 1.0f)
+			transX = 1.0f;
+	}
+
+	if (key == GLFW_KEY_J && action == GLFW_PRESS) {
+		transY -= 0.1f;
+		if (transZ <= -1.0f)
+			transZ = -1.0f;
+	}
+
+	if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_PRESS) {
+		scale -= 0.1f;
+		if (scale <= -2.0f)
+			scale = -2.0f;
+	}
+
+	if (key == GLFW_KEY_RIGHT_BRACKET && action == GLFW_PRESS) {
+		scale += 0.1f;
+		if (scale >= 2.0f)
+			scale = 2.0f;
+	}
 }
 
-//Esta função está basntante hardcoded - objetivo é compilar e "buildar" um programa de
+// Esta função está basntante hardcoded - objetivo é compilar e "buildar" um programa de
 // shader simples e único neste exemplo de código
 // O código fonte do vertex e fragment shader está nos arrays vertexShaderSource e
 // fragmentShader source no iniçio deste arquivo
@@ -240,53 +293,53 @@ int setupGeometry() {
 	// Cada atributo do vértice (coordenada, cores, coordenadas de textura, normal, etc)
 	// Pode ser arazenado em um VBO único ou em VBOs separados
 	GLfloat vertices[] = {
-		//Base da pirâmide: 2 triângulos
-		//x    y    z    r    g    b
-		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		-0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		 0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		// Base da pirâmide: 2 triângulos
+		// x     y     z    r    g    b
+		-0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
+		-0.5, -0.5,  0.5, 1.0, 0.0, 0.0,
+		 0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
 
 		-0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
 		 0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
 		 0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
 
 		 //
-		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		 0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		 0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
+		 -0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
+		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
+		  0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
 
-		-0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
-		 0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
-		-0.5, -0.5,  0.5, 1.0, 0.0, 1.0,
+		 -0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		  0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
+		 -0.5, -0.5,  0.5, 1.0, 0.0, 1.0,
 
-		-0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
-		 0.0,  0.5, 0.0, 1.0, 1.0, 0.0,
-		 0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
+		 -0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
+		  0.0,  0.5, 0.0, 1.0, 1.0, 0.0,
+		  0.5, -0.5, 0.5, 1.0, 1.0, 0.0,
 
-		 0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		 0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
-		 0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
+		  0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
+		  0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
+		  0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
 	};
 
 	GLuint VBO, VAO;
 
-	//Geração do identificador do VBO
+	// Geração do identificador do VBO
 	glGenBuffers(1, &VBO);
 
-	//Faz a conexão (vincula) do buffer como um buffer de array
+	// Faz a conexão (vincula) do buffer como um buffer de array
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	//Envia os dados do array de floats para o buffer da OpenGl
+	// Envia os dados do array de floats para o buffer da OpenGl
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	//Geração do identificador do VAO (Vertex Array Object)
+	// Geração do identificador do VAO (Vertex Array Object)
 	glGenVertexArrays(1, &VAO);
 
 	// Vincula (bind) o VAO primeiro, e em seguida  conecta e seta o(s) buffer(s) de vértices
 	// e os ponteiros para os atributos 
 	glBindVertexArray(VAO);
 
-	//Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
+	// Para cada atributo do vertice, criamos um "AttribPointer" (ponteiro para o atributo), indicando: 
 	// Localização no shader * (a localização dos atributos devem ser correspondentes no layout especificado no vertex shader)
 	// Numero de valores que o atributo tem (por ex, 3 coordenadas xyz) 
 	// Tipo do dado
@@ -294,7 +347,7 @@ int setupGeometry() {
 	// Tamanho em bytes 
 	// Deslocamento a partir do byte zero 
 
-	//Atributo posição (x, y, z)
+	// Atributo posição (x, y, z)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 
