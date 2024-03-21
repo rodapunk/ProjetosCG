@@ -3,4 +3,4 @@ Repositório destinado à entrega das tarefas da disciplina de Computação Grá
 
 Tarefa do M1 - Hello3D - https://github.com/rodapunk/ProjetosCG/blob/main/Hello3D/RESULT.md
 
-(em desenvolvimento...) Tarefa do M2 - Hello3DCube - https://github.com/rodapunk/ProjetosCG/tree/main/Hello3DCube
+Tarefa do M2 - Hello3DCube - https://github.com/rodapunk/ProjetosCG/blob/main/Hello3DCube/RESULT.md
