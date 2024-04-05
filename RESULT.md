@@ -20,4 +20,4 @@ Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloTexturesCubeObj
 
 <img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/03-tarefa_m3.gif">
 
-Um modelo 3D renderizado a partir de um arquivo OBJ com as informações de vértices, vetores normais e coordenadas de textura. Também foi lido um arquivo MTL e impresso o nome do arquivo da textura a ser futuramente aplicada na superfície do material para modificar a sua aparência difusa.
+Um modelo 3D renderizado a partir de um arquivo OBJ com as informações de vértices, vetores normais e coordenadas de textura. Também foi lido um arquivo MTL e impresso no console o nome do arquivo da textura a ser futuramente aplicada na superfície do material para modificar a sua aparência difusa.
