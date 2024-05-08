@@ -26,6 +26,6 @@ Um modelo 3D renderizado a partir de um arquivo OBJ com as informações de vér
 
 Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloPhong
 
-*inserir gif.
+<img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/04-tarefa_m4.gif">
 
 Três objetos renderizados os quais foram lidas as informações dos vetores normais nos arquivos .obj e configuradas no vertex shader. Também foram lidas as informações dos coeficientes de iluminação ambiente, difusa, especular e o expoente de reflexão especular nos arquivos .mtl e configuradas no fragment shader. Por fim, foi implementado em GLSL, no fragment shader, o cálculo das parcelas ambiente, difusa e especular do modelo de iluminação de Phong.
