@@ -21,3 +21,11 @@ Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloTexturesCubeObj
 <img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/03-tarefa_m3.gif">
 
 Um modelo 3D renderizado a partir de um arquivo OBJ com as informações de vértices, vetores normais e coordenadas de textura. Também foi lido um arquivo MTL e impresso no console o nome do arquivo da textura a ser futuramente aplicada na superfície do material para modificar a sua aparência difusa.
+
+# Tarefa M4
+
+Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloPhong
+
+*inserir gif.
+
+Três objetos renderizados os quais foram lidas as informações dos vetores normais nos arquivos .obj e configuradas no vertex shader. Também foram lidas as informações dos coeficientes de iluminação ambiente, difusa, especular e o expoente de reflexão especular nos arquivos .mtl e configuradas no fragment shader. Por fim, foi implementado em GLSL, no fragment shader, o cálculo das parcelas ambiente, difusa e especular do modelo de iluminação de Phong.
