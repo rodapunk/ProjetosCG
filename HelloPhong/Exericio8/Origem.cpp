@@ -159,10 +159,8 @@ int main() {
 		
 		// Controle dos objetos, porém a parcela especular "rotaciona" junto com o
 		// objeto, o que não deveria acontecer já que a fonte de luz é estática...
-		//angle = (float)glfwGetTime();
-		//if (selection == 1) {
-		//	controlMesh(suzanne);
-		//	suzanne.draw();
+
+
 
 		//	planeta.angle = (float)glfwGetTime() * 10;
 		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
