@@ -7,6 +7,8 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <random>
+#include <algorithm>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,6 +19,10 @@
 
 #include "Shader.h"
 #include "Mesh.h"
+#include "Bezier.h"
+#include "CatmullRom.h"
+#include "Curve.h"
+#include "Hermite.h"
 
 using namespace std;
 
@@ -34,6 +40,10 @@ int loadTexture(string path);
 int loadSimpleObj(string filepath, int &nVerts, glm::vec3 color);
 vector<float> loadMtl(string filepath, GLuint &texID);
 void controlMesh(Mesh mesh);
+vector<glm::vec3> generateControlPointsSet(int nPoints);
+vector<glm::vec3> generateControlPointsSet();
+vector<glm::vec3> generateUnisinosPointsSet();
+GLuint generateControlPointsBuffer(vector<glm::vec3> controlPoints);
 
 // Dimensões da janela (pode ser alterado em tempo de execução)
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -70,7 +80,6 @@ int main() {
 	// Fazendo o registro da função de callback para a janela GLFW
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
-
 	glfwSetCursorPos(window, WIDTH / 2, HEIGHT / 2);
 
 	// Desabilita o desenho do cursor
@@ -127,8 +136,9 @@ int main() {
 	shader.setVec3("lightColor", 1.0, 1.0, 1.0);
 
 	glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_ALWAYS);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
+
 	while (!glfwWindowShouldClose(window)) {
 		// Checa se houve eventos de input (key pressed, mouse moved etc.) e chama as funções de callback correspondentes
 		glfwPollEvents();
@@ -146,56 +156,62 @@ int main() {
 
 		// Atualizando o shader com a posição da câmera
 		shader.setVec3("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
-
+		
 		// Chamada de desenho - drawcall
 		suzanne.update();
 		suzanne.draw();
+
 		planeta.update();
 		planeta.draw();
+
 		logo.update();
 		logo.draw();
 		
 		// Controle dos objetos, porém a parcela especular "rotaciona" junto com o
 		// objeto, o que não deveria acontecer já que a fonte de luz é estática...
-		/*angle = glfwGetTime();
-		if (selection == 1) {
-			controlMesh(suzanne);
-			suzanne.draw();
-			planeta.angle = (float)glfwGetTime() * 10;
-			planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-			planeta.update();
-			planeta.draw();
-			logo.update();
-			logo.draw();
-		}
-		else if (selection == 2) {
-			suzanne.update();
-			suzanne.draw();
-			controlMesh(planeta);
-			planeta.draw();
-			logo.update();
-			logo.draw();
-		}
-		else if (selection == 3) {
-			suzanne.update();
-			suzanne.draw();
-			planeta.angle = (float)glfwGetTime() * 10;
-			planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-			planeta.update();
-			planeta.draw();
-			controlMesh(logo);
-			logo.draw();
-		}
-		else {
-			suzanne.update();
-			suzanne.draw();
-			planeta.angle = (float)glfwGetTime() * 10;
-			planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-			planeta.update();
-			planeta.draw();
-			logo.update();
-			logo.draw();
-		}*/
+
+		//	planeta.angle = (float)glfwGetTime() * 10;
+		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+		//	planeta.update();
+		//	planeta.draw();
+
+		//	logo.update();
+		//	logo.draw();
+		//}
+		//else if (selection == 2) {
+		//	suzanne.update();
+		//	suzanne.draw();
+
+		//	controlMesh(planeta);
+		//	planeta.draw();
+
+		//	logo.update();
+		//	logo.draw();
+		//}
+		//else if (selection == 3) {
+		//	suzanne.update();
+		//	suzanne.draw();
+
+		//	planeta.angle = (float)glfwGetTime() * 10;
+		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+		//	planeta.update();
+		//	planeta.draw();
+
+		//	controlMesh(logo);
+		//	logo.draw();
+		//}
+		//else {
+		//	suzanne.update();
+		//	suzanne.draw();
+
+		//	planeta.angle = (float)glfwGetTime() * 10;
+		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+		//	planeta.update();
+		//	planeta.draw();
+
+		//	logo.update();
+		//	logo.draw();
+		//}
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
