@@ -7,8 +7,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <random>
-#include <algorithm>
+#include <iomanip>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -19,10 +18,6 @@
 
 #include "Shader.h"
 #include "Mesh.h"
-#include "Bezier.h"
-#include "CatmullRom.h"
-#include "Curve.h"
-#include "Hermite.h"
 
 using namespace std;
 
@@ -37,13 +32,13 @@ int setupGeometry();
 int generateCircle(float radius, int nPoints);
 int setupSprite();
 int loadTexture(string path);
-int loadSimpleObj(string filepath, int &nVerts, glm::vec3 color);
-vector<float> loadMtl(string filepath, GLuint &texID);
+int loadSimpleObj(string filepath, int& nVerts, glm::vec3 color);
+vector<float> loadMtl(string filepath, GLuint& texID);
 void controlMesh(Mesh mesh);
-vector<glm::vec3> generateControlPointsSet(int nPoints);
-vector<glm::vec3> generateControlPointsSet();
-vector<glm::vec3> generateUnisinosPointsSet();
-GLuint generateControlPointsBuffer(vector<glm::vec3> controlPoints);
+void generateRectanglePositions(vector<glm::vec3>& positions, int numPoints);
+void generateRandomPositions(std::vector<glm::vec3>& positions, int numPoints);
+void writePositionsToFile(const vector<glm::vec3>& positions, const string& filename);
+vector<glm::vec3> loadPos(string filepath);
 
 // Dimensões da janela (pode ser alterado em tempo de execução)
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -56,9 +51,9 @@ float transX = 0.0f, transY = 0.0f, transZ = 0.0f, scale = 1.0f;
 float sensitivity = 0.05f, pitch = 0.0f, yaw = -90.0f;
 const float pi = 3.1419f;
 double lastX, lastY;
-int nVerts;
+int nVerts1, nVerts2, nVerts3, nVerts4;
 int selection;
-GLuint texID1, texID2, texID3;
+GLuint texID1, texID2, texID3, texID4;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.5f, 6.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -80,6 +75,7 @@ int main() {
 	// Fazendo o registro da função de callback para a janela GLFW
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+
 	glfwSetCursorPos(window, WIDTH / 2, HEIGHT / 2);
 
 	// Desabilita o desenho do cursor
@@ -91,7 +87,7 @@ int main() {
 	}
 
 	// Obtendo as informações de versão
-	const GLubyte* renderer = glGetString(GL_RENDERER); 
+	const GLubyte* renderer = glGetString(GL_RENDERER);
 	const GLubyte* version = glGetString(GL_VERSION);
 	cout << "Renderer: " << renderer << endl;
 	cout << "OpenGL version supported " << version << endl;
@@ -116,27 +112,41 @@ int main() {
 	shader.setMat4("projection", glm::value_ptr(projection));
 
 	// Carregando um objeto e armazenando o identificador na memória
-	GLuint VAO1 = loadSimpleObj("../../3D_Models/Suzanne/SuzanneTriTextured.obj", nVerts, glm::vec3(0.0f, 0.0f, 0.0f));
-	GLuint VAO2 = loadSimpleObj("../../3D_Models/Planetas/planeta.obj", nVerts, glm::vec3(0.0f, 0.0f, 0.0f));
-	GLuint VAO3 = loadSimpleObj("../../3D_Models/Novos/cienciaDaComputacao.obj", nVerts, glm::vec3(0.0f, 0.0f, 0.0f));
-	
+	GLuint VAO1 = loadSimpleObj("../../3D_Models/Suzanne/SuzanneTriTextured.obj", nVerts1, glm::vec3(0.0f, 0.0f, 0.0f));
+	GLuint VAO2 = loadSimpleObj("../../3D_Models/Planetas/planeta.obj", nVerts2, glm::vec3(0.0f, 0.0f, 0.0f));
+	GLuint VAO3 = loadSimpleObj("../../3D_Models/Novos/cienciaDaComputacao.obj", nVerts3, glm::vec3(0.0f, 0.0f, 0.0f));
+	GLuint VAO4 = loadSimpleObj("../../3D_Models/Suzanne/CuboTextured.obj", nVerts4, glm::vec3(0.0f, 0.0f, 0.0f));
+
 	// Lendo o arquivo mtl (lendo os coeficientes e a textura)
 	vector<float> coefficients1 = loadMtl("../../3D_Models/Suzanne/SuzanneTriTextured.mtl", texID1);
 	vector<float> coefficients2 = loadMtl("../../3D_Models/Planetas/planeta.mtl", texID2);
 	vector<float> coefficients3 = loadMtl("../../3D_Models/Novos/cienciaDaComputacao.mtl", texID3);
+	vector<float> coefficients4 = loadMtl("../../3D_Models/Suzanne/CuboTextured.mtl", texID4);
 
 	// Criando e inicializando os meshs
-	Mesh suzanne, planeta, logo;
-	suzanne.initialize(VAO1, nVerts, texID2, coefficients1, &shader, glm::vec3(-1.5, 0.0, 0.0));
-	planeta.initialize(VAO2, nVerts, texID3, coefficients2, &shader, glm::vec3(1.5, 0.0, 0.0));
-	logo.initialize(VAO3, nVerts, texID1, coefficients3, &shader, glm::vec3(0.0, 3.0, -5.0), glm::vec3(1.0, 1.0, 1.0));
+	Mesh suzanne, planeta, logo, cubo;
+	suzanne.initialize(VAO1, nVerts1, texID1, coefficients1, &shader, glm::vec3(0.0, 0.0, 0.0));
+	planeta.initialize(VAO2, nVerts2, texID2, coefficients2, &shader, glm::vec3(-10.0, 0.0, 5.0));
+	logo.initialize(VAO3, nVerts3, texID3, coefficients3, &shader, glm::vec3(0.0, 3.0, -5.0), glm::vec3(1.0, 1.0, 1.0));
+	cubo.initialize(VAO4, nVerts4, texID4, coefficients4, &shader, glm::vec3(3.0, 0.0, 0.0));
 
 	// Definindo a fonte de luz pontual
 	shader.setVec3("lightPos", -50.0, 10.0, 20.0);
 	shader.setVec3("lightColor", 1.0, 1.0, 1.0);
 
+	// Gerando e escrevendo os vetores de posição no arquivo txt
+	vector<glm::vec3> positions_planeta;
+	vector<glm::vec3> positions_cubo;
+	generateRectanglePositions(positions_planeta, 30);
+	generateRandomPositions(positions_cubo, 10);
+	writePositionsToFile(positions_planeta, "positions_planeta.txt");
+	writePositionsToFile(positions_cubo, "positions_cubo.txt");
+	
+	// Lendo o arquivo txt com os vetores de posição e adicionando-os ao objeto
+	planeta.positions = loadPos("../../HelloParametric/Exericio8/positions_planeta.txt");
+	cubo.positions = loadPos("../../HelloParametric/Exericio8/positions_cubo.txt");
+	
 	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_ALWAYS);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -156,62 +166,25 @@ int main() {
 
 		// Atualizando o shader com a posição da câmera
 		shader.setVec3("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
-		
+
 		// Chamada de desenho - drawcall
+		angle = glfwGetTime();
+		double currentTime = glfwGetTime(); // obtém o tempo atual
+		suzanne.angle = angle * 25;
+		suzanne.axis = glm::vec3(0.0f, -1.0f, 0.0f);
 		suzanne.update();
 		suzanne.draw();
-
+		planeta.angle = angle * 30;
+		planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+		planeta.update();
+		planeta.move(currentTime, 0.5);
 		planeta.update();
 		planeta.draw();
-
 		logo.update();
 		logo.draw();
-		
-		// Controle dos objetos, porém a parcela especular "rotaciona" junto com o
-		// objeto, o que não deveria acontecer já que a fonte de luz é estática...
-
-		//	planeta.angle = (float)glfwGetTime() * 10;
-		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-		//	planeta.update();
-		//	planeta.draw();
-
-		//	logo.update();
-		//	logo.draw();
-		//}
-		//else if (selection == 2) {
-		//	suzanne.update();
-		//	suzanne.draw();
-
-		//	controlMesh(planeta);
-		//	planeta.draw();
-
-		//	logo.update();
-		//	logo.draw();
-		//}
-		//else if (selection == 3) {
-		//	suzanne.update();
-		//	suzanne.draw();
-
-		//	planeta.angle = (float)glfwGetTime() * 10;
-		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-		//	planeta.update();
-		//	planeta.draw();
-
-		//	controlMesh(logo);
-		//	logo.draw();
-		//}
-		//else {
-		//	suzanne.update();
-		//	suzanne.draw();
-
-		//	planeta.angle = (float)glfwGetTime() * 10;
-		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-		//	planeta.update();
-		//	planeta.draw();
-
-		//	logo.update();
-		//	logo.draw();
-		//}
+		cubo.move(currentTime, 0.7);
+		cubo.update();
+		cubo.draw();
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
@@ -220,6 +193,7 @@ int main() {
 	glDeleteVertexArrays(1, &VAO1);
 	glDeleteVertexArrays(1, &VAO2);
 	glDeleteVertexArrays(1, &VAO3);
+	glDeleteVertexArrays(1, &VAO4);
 
 	// Finaliza a execução da GLFW, limpando os recursos alocados por ela
 	glfwTerminate();
@@ -232,7 +206,7 @@ int main() {
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	
+
 	if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
 		selection = 0;
 	}
@@ -278,7 +252,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_W) {
 		cameraPos += cameraFront * cameraSpeed;
 	}
-	
+
 	if (key == GLFW_KEY_S) {
 		cameraPos -= cameraFront * cameraSpeed;
 	}
@@ -347,33 +321,33 @@ int setupGeometry() {
 		-0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
 		 0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
 		 0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
-		
-		//
-		-0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
-		 0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		 0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
 
-		-0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
-		 0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
-		-0.5, -0.5,  0.5, 1.0, 0.0, 1.0,
+		 //
+		 -0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
+		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
+		  0.5, -0.5, -0.5, 1.0, 1.0, 0.0,
 
-	    -0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
-		 0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
-		 0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
+		 -0.5, -0.5, -0.5, 1.0, 0.0, 1.0,
+		  0.0,  0.5,  0.0, 1.0, 0.0, 1.0,
+		 -0.5, -0.5,  0.5, 1.0, 0.0, 1.0,
 
-		 0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
-		 0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
-		 0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
+		 -0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
+		  0.0,  0.5,  0.0, 1.0, 1.0, 0.0,
+		  0.5, -0.5,  0.5, 1.0, 1.0, 0.0,
 
-		// Chão
-		//x     y     z    r    g    b
-		-5.0, -0.5, -5.0, 0.5, 0.5, 0.5,
-		-5.0, -0.5,  5.0, 0.5, 0.5, 0.5,
-		 5.0, -0.5, -5.0, 0.5, 0.5, 0.5,
+		  0.5, -0.5,  0.5, 0.0, 1.0, 1.0,
+		  0.0,  0.5,  0.0, 0.0, 1.0, 1.0,
+		  0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
 
-		-5.0, -0.5,  5.0, 0.5, 0.5, 0.5,
-		 5.0, -0.5,  5.0, 0.5, 0.5, 0.5,
-		 5.0, -0.5, -5.0, 0.5, 0.5, 0.5
+		  // Chão
+		  //x     y     z    r    g    b
+		  -5.0, -0.5, -5.0, 0.5, 0.5, 0.5,
+		  -5.0, -0.5,  5.0, 0.5, 0.5, 0.5,
+		   5.0, -0.5, -5.0, 0.5, 0.5, 0.5,
+
+		  -5.0, -0.5,  5.0, 0.5, 0.5, 0.5,
+		   5.0, -0.5,  5.0, 0.5, 0.5, 0.5,
+		   5.0, -0.5, -5.0, 0.5, 0.5, 0.5
 	};
 
 	GLuint VBO, VAO;
@@ -431,7 +405,7 @@ int generateCircle(float radius, int nPoints) {
 
 	float angle = 0.0;
 	float slice = 2 * pi / (GLfloat)nPoints;
-	
+
 	for (int i = 3; i < totalSize; i += 3) {
 		float x = radius * cos(angle) * 100;
 		float y = radius * sin(angle) * 100;
@@ -487,11 +461,11 @@ int setupSprite() {
 	GLuint VBO, EBO;
 
 	float vertices[] = {
-		 // posicoes        // cores          // coordenadas de textura
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // superior direito
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // inferior direito
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // inferior esquerdo
-		-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // superior esquerdo
+		// posicoes        // cores          // coordenadas de textura
+		0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // superior direito
+		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // inferior direito
+	   -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // inferior esquerdo
+	   -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // superior esquerdo
 	};
 
 	unsigned int indices[] = {
@@ -549,22 +523,24 @@ int loadTexture(string path) {
 	if (data) {
 		if (nrChannels == 3) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		} else {
+		}
+		else {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
+	}
+	else {
 		std::cout << "Failed to load texture" << std::endl;
 	}
 
 	stbi_image_free(data);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texID;
 }
 
-int loadSimpleObj(string filepath, int &nVerts, glm::vec3 color) {
+int loadSimpleObj(string filepath, int& nVerts, glm::vec3 color) {
 	vector <glm::vec3> vertices;
 	vector <GLuint> indices;
 	vector <glm::vec2> texCoords;
@@ -626,7 +602,7 @@ int loadSimpleObj(string filepath, int &nVerts, glm::vec3 color) {
 					index = atoi(token.c_str()) - 1;
 					vbuffer.push_back(texCoords[index].s);
 					vbuffer.push_back(texCoords[index].t);
-					
+
 					// Recuperando os indices de vns
 					tokens[i] = tokens[i].substr(pos + 1);
 					index = atoi(tokens[i].c_str()) - 1;
@@ -636,7 +612,8 @@ int loadSimpleObj(string filepath, int &nVerts, glm::vec3 color) {
 				}
 			}
 		}
-	} else {
+	}
+	else {
 		cout << "Problema ao encontrar o arquivo " << filepath << endl;
 	}
 
@@ -692,12 +669,12 @@ int loadSimpleObj(string filepath, int &nVerts, glm::vec3 color) {
 	return VAO;
 }
 
-vector<float> loadMtl(string filepath, GLuint &texID) {
-	vector <GLfloat> coefficients;
+vector<float> loadMtl(string filepath, GLuint& texID) {
+	vector<GLfloat> coefficients;
 
 	ifstream inputFile;
 	inputFile.open(filepath.c_str());
-	
+
 	if (inputFile.is_open()) {
 		char line[100];
 		string sline;
@@ -708,7 +685,7 @@ vector<float> loadMtl(string filepath, GLuint &texID) {
 			string word;
 			istringstream ssline(line);
 			ssline >> word;
-			
+
 			if (word == "Ns") {
 				float value;
 				ssline >> value;
@@ -735,7 +712,7 @@ vector<float> loadMtl(string filepath, GLuint &texID) {
 	else {
 		cout << "Não foi possível ler o arquivo mtl..." << endl;
 	}
-	
+
 	return coefficients;
 }
 
@@ -758,4 +735,128 @@ void controlMesh(Mesh mesh) {
 	}
 
 	mesh.update();
+}
+
+void generateRectanglePositions(vector<glm::vec3>& positions, int numPoints) {
+	float sideX = 20.0f; // Lado do retângulo no eixo X
+	float sideZ = 10.0f; // Lado do retângulo no eixo Z
+	float perimeter = 2 * (sideX + sideZ); // Perímetro do retângulo
+	float spacing = perimeter / numPoints; // Espaçamento entre os pontos
+
+	positions.clear();
+	positions.reserve(numPoints);
+
+	float currentLength = 0.0f;
+
+	// Lado frontal do retângulo (no plano xz)
+	for (float x = -sideX / 2.0f; x < sideX / 2.0f && positions.size() < numPoints; x += spacing) {
+		positions.emplace_back(x, 0.0f, sideZ / 2.0f);
+		currentLength += spacing;
+	}
+
+	// Lado direito do retângulo (no plano xz)
+	for (float z = sideZ / 2.0f; z > -sideZ / 2.0f && positions.size() < numPoints; z -= spacing) {
+		positions.emplace_back(sideX / 2.0f, 0.0f, z);
+		currentLength += spacing;
+	}
+
+	// Lado traseiro do retângulo (no plano xz)
+	for (float x = sideX / 2.0f; x > -sideX / 2.0f && positions.size() < numPoints; x -= spacing) {
+		positions.emplace_back(x, 0.0f, -sideZ / 2.0f);
+		currentLength += spacing;
+	}
+
+	// Lado esquerdo do retângulo (no plano xz)
+	for (float z = -sideZ / 2.0f; z < sideZ / 2.0f && positions.size() < numPoints; z += spacing) {
+		positions.emplace_back(-sideX / 2.0f, 0.0f, z);
+		currentLength += spacing;
+	}
+
+	// Ajustar espaçamento para preencher pontos restantes, se necessário
+	if (positions.size() < numPoints) {
+		float remainingLength = perimeter - currentLength;
+		float remainingSpacing = remainingLength / (numPoints - positions.size());
+
+		for (float x = -sideX / 2.0f; x < sideX / 2.0f && positions.size() < numPoints; x += remainingSpacing) {
+			positions.emplace_back(x, 0.0f, sideZ / 2.0f);
+		}
+		for (float z = sideZ / 2.0f; z > -sideZ / 2.0f && positions.size() < numPoints; z -= remainingSpacing) {
+			positions.emplace_back(sideX / 2.0f, 0.0f, z);
+		}
+		for (float x = sideX / 2.0f; x > -sideX / 2.0f && positions.size() < numPoints; x -= remainingSpacing) {
+			positions.emplace_back(x, 0.0f, -sideZ / 2.0f);
+		}
+		for (float z = -sideZ / 2.0f; z < sideZ / 2.0f && positions.size() < numPoints; z += remainingSpacing) {
+			positions.emplace_back(-sideX / 2.0f, 0.0f, z);
+		}
+	}
+}
+
+void generateRandomPositions(std::vector<glm::vec3>& positions, int numPoints) {
+	positions.clear();
+	positions.reserve(numPoints);
+
+	// Gerador de números aleatórios
+	std::srand(static_cast<unsigned int>(std::time(0)));
+
+	// Definir o intervalo dos valores aleatórios
+	float rangeX = 10.0f; // Range para X: -5.0 a 5.0
+	float rangeY = 10.0f; // Range para Y: -5.0 a 5.0
+	float rangeZ = 10.0f; // Range para Z: -5.0 a 5.0
+
+	// Gerar ponto inicial aleatório
+	float startX = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * rangeX - rangeX / 2.0f;
+	float startY = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * rangeY - rangeY / 2.0f;
+	float startZ = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * rangeZ - rangeZ / 2.0f;
+	glm::vec3 startPoint(startX, startY, startZ);
+
+	positions.emplace_back(startPoint);
+
+	// Gerar pontos intermediários aleatórios
+	for (int i = 1; i < numPoints; ++i) {
+		float x = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * rangeX - rangeX / 2.0f;
+		float y = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * rangeY - rangeY / 2.0f;
+		float z = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * rangeZ - rangeZ / 2.0f;
+		positions.emplace_back(x, y, z);
+	}
+}
+
+void writePositionsToFile(const vector<glm::vec3>& positions, const string& filename) {
+	ofstream outFile(filename);
+
+	if (!outFile) {
+		cerr << "Error opening file: " << filename << std::endl;
+		return;
+	}
+	for (const auto& vec : positions) {
+		outFile << fixed << setprecision(1) << vec.x << " " << vec.y << " " << vec.z << "\n";
+	}
+
+	outFile.close();
+}
+
+vector<glm::vec3> loadPos(string filepath) {
+	vector<glm::vec3> positions;
+
+	ifstream inputFile;
+	inputFile.open(filepath.c_str());
+
+	if (inputFile.is_open()) {
+		char line[100];
+		string sline;
+
+		while (!inputFile.eof()) {
+			inputFile.getline(line, 100);
+			sline = line;
+			float posX, posY, posZ;
+			istringstream ssline(line);
+			ssline >> posX >> posY >> posZ;
+			positions.push_back(glm::vec3(posX, posY, posZ));
+		}
+	}
+	else {
+		cout << "Não foi possível ler o arquivo de posições..." << endl;
+	}
+
+	return positions;
 }
