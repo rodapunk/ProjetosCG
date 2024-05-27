@@ -37,3 +37,11 @@ Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloPhongCamera
 <img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/05-tarefa_m5.gif">
 
 Implementada a câmera em primeira pessoa com o controle de movimento pelas teclas WASD no plano x-z, pelas teclas CTRL e SPACE no plano y e controle de rotação pelo mouse.
+
+# Tarefa M6
+
+Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloParametric
+
+<img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/06-tarefa_m6.gif">
+
+Implementadas duas funções que criam vetores de posição para que os objetos possam percorrer uma trajetória no espaço, sejam estas trajetórias: retangular no plano xz e aleatória. Uma terceira função escreve em um arquivo txt estes vetores e uma quarta função carrega estes vetores de posição, em uma variável 'positions' do objeto, a partir do arquivo txt. O objeto planeta terra percorre uma trajetória retangular no plano xz em torno do objeto Suzanne, enquanto que o objeto bola percorre uma trajetória aleatória, ambas cíclicas.
