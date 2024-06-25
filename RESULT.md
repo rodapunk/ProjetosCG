@@ -45,3 +45,11 @@ Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloParametric
 <img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/06-tarefa_m6.gif">
 
 Implementadas duas funções que criam vetores de posição para que os objetos possam percorrer uma trajetória no espaço, sejam estas trajetórias: retangular no plano xz e aleatória. Uma terceira função escreve em um arquivo txt estes vetores e uma quarta função carrega estes vetores de posição, em uma variável 'positions' do objeto, a partir do arquivo txt. O objeto planeta terra percorre uma trajetória retangular no plano xz em torno do objeto Suzanne, enquanto que o objeto bola percorre uma trajetória aleatória, ambas cíclicas.
+
+# Tarefa Final
+
+Link: https://github.com/rodapunk/ProjetosCG/tree/main/HelloParametricBezier
+
+<img src="https://github.com/rodapunk/ProjetosCG/blob/main/images/07-tarefa_m7.gif">
+
+Implementada a curva paramétrica de Bézier, que é uma curva suave e contínua definida por um conjunto de pontos de controle, onde cada ponto da curva é calculado como uma combinação ponderada desses pontos usando polinômios como funções de interpolação. O objeto planeta terra percorre uma trajetória circular no plano xz em torno do objeto Suzanne, enquanto que o objeto bola percorre uma trajetória aleatória, ambas cíclicas.
