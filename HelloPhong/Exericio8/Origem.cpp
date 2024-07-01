@@ -148,62 +148,61 @@ int main() {
 		shader.setVec3("cameraPos", cameraPos.x, cameraPos.y, cameraPos.z);
 		
 		// Chamada de desenho - drawcall
-		suzanne.update();
-		suzanne.draw();
+		//suzanne.update();
+		//suzanne.draw();
 
-		planeta.update();
-		planeta.draw();
+		//planeta.update();
+		//planeta.draw();
 
-		logo.update();
-		logo.draw();
+		//logo.update();
+		//logo.draw();
 		
 		// Controle dos objetos, porém a parcela especular "rotaciona" junto com o
 		// objeto, o que não deveria acontecer já que a fonte de luz é estática...
 
+		if (selection == 1) {
+			planeta.angle = (float)glfwGetTime() * 10;
+			planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+			planeta.update();
+			planeta.draw();
 
+			logo.update();
+			logo.draw();
+		}
+		else if (selection == 2) {
+			suzanne.update();
+			suzanne.draw();
 
-		//	planeta.angle = (float)glfwGetTime() * 10;
-		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-		//	planeta.update();
-		//	planeta.draw();
+			controlMesh(planeta);
+			planeta.draw();
 
-		//	logo.update();
-		//	logo.draw();
-		//}
-		//else if (selection == 2) {
-		//	suzanne.update();
-		//	suzanne.draw();
+			logo.update();
+			logo.draw();
+		}
+		else if (selection == 3) {
+			suzanne.update();
+			suzanne.draw();
 
-		//	controlMesh(planeta);
-		//	planeta.draw();
+			planeta.angle = (float)glfwGetTime() * 10;
+			planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+			planeta.update();
+			planeta.draw();
 
-		//	logo.update();
-		//	logo.draw();
-		//}
-		//else if (selection == 3) {
-		//	suzanne.update();
-		//	suzanne.draw();
+			controlMesh(logo);
+			logo.draw();
+		}
+		else {
+			suzanne.update();
+			suzanne.draw();
 
-		//	planeta.angle = (float)glfwGetTime() * 10;
-		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-		//	planeta.update();
-		//	planeta.draw();
+			planeta.angle = (float)glfwGetTime() * 10;
+			planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
+			planeta.update();
+			planeta.draw();
 
-		//	controlMesh(logo);
-		//	logo.draw();
-		//}
-		//else {
-		//	suzanne.update();
-		//	suzanne.draw();
-
-		//	planeta.angle = (float)glfwGetTime() * 10;
-		//	planeta.axis = glm::vec3(0.0f, 1.0f, 0.0f);
-		//	planeta.update();
-		//	planeta.draw();
-
-		//	logo.update();
-		//	logo.draw();
-		//}
+			logo.update();
+			logo.draw();
+		}
 
 		// Troca os buffers da tela
 		glfwSwapBuffers(window);
